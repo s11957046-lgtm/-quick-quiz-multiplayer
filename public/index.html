@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>快問快答｜多人連線競賽</title>
+<!-- 引入 Socket.IO 與 官方 QRCode.js 函式庫 -->
 <script src="/socket.io/socket.io.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cloudflare.com"></script>
 <style>
 :root{--blue:#4263eb;--ink:#202640;--muted:#68738b;--line:#e3e8f4}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#edf2ff,#f8faff 55%,#eefaf7);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:var(--ink);min-height:100vh}
@@ -12,83 +14,102 @@
 .card{background:white;border:1px solid var(--line);border-radius:21px;padding:clamp(18px,4vw,30px);box-shadow:0 12px 35px #3449a80d;margin-bottom:16px}
 h2{margin:0 0 16px}label{display:block;font-weight:700;margin:13px 0 6px}input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font:inherit;background:#fbfcff;color:var(--ink)}textarea{min-height:70px;resize:vertical}
 button{border:0;border-radius:12px;padding:12px 17px;font:inherit;font-weight:750;cursor:pointer}.primary{background:var(--blue);color:#fff}.secondary{background:#edf0f8;color:#39435d}.danger{background:#fff0f0;color:#b42318;padding:8px 11px}.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.hidden{display:none!important}
-.option-edit{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0}.radio{display:flex;gap:5px;align-items:center;font-size:13px;color:var(--muted);white-space:nowrap}.radio input{width:auto}
 .qrow{border-top:1px solid var(--line);padding:12px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}.code{font-size:clamp(32px,8vw,54px);font-weight:900;letter-spacing:8px;color:var(--blue);text-align:center;background:#f1f4ff;border-radius:15px;padding:12px}.sharebox{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;margin:16px auto}.qrbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;min-width:150px;min-height:150px;display:grid;place-items:center}.qrbox img{display:block}
 .center{text-align:center}.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin-top:12px}.player{background:#f5f7fc;padding:10px 12px;border-radius:10px;display:flex;justify-content:space-between;gap:8px}
 .topline{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-weight:700}.progress{height:9px;background:#edf0f8;border-radius:20px;overflow:hidden;margin:12px 0 24px}.bar{height:100%;background:#20a77b;width:0}
 .question{font-size:clamp(22px,4vw,30px);line-height:1.4;margin:0 0 20px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:11px}.answer{background:white;border:2px solid var(--line);color:var(--ink);text-align:left;padding:15px}.answer:disabled{cursor:default;opacity:.8}.answer.correct{border-color:#21a179;background:#edfbf5}.answer.wrong{border-color:#e46a6a;background:#fff2f2}.status{font-weight:750;min-height:26px;margin-top:15px}.rank{font-size:20px;font-weight:800;color:var(--blue);margin-right:8px}.small{font-size:13px;color:var(--muted)}
-@media(max-width:600px){.grid,.answers{grid-template-columns:1fr}.option-edit{grid-template-columns:1fr}.radio{padding-left:4px}.code{letter-spacing:5px}}
+@media(max-width:600px){.grid,.answers{grid-template-columns:1fr}.code{letter-spacing:5px}}
 </style>
 </head>
-<body><div class="wrap">
-<header><h1>🏆 快問快答・多人競賽</h1><p>主持人建立房間，玩家用手機輸入代碼一起答題！</p></header>
+<body>
+<div class="wrap">
+ <header>
+  <h1>🏆 快問快答・多人競賽</h1>
+  <p>主持人建立房間，玩家用手機輸入代碼一起答題！</p>
+ </header>
 
-<!-- 主分頁 -->
-<section class="card" id="home">
- <div class="grid">
-  <div><h2>🎤 建立遊戲（主持人）</h2>
-   <label>主持人名稱</label><input id="hostName" maxlength="16" value="主持人">
-   <label>每題作答秒數</label><select id="seconds"><option>10</option><option selected>15</option><option>20</option><option>30</option><option>45</option><option>60</option></select>
-   <div class="buttons"><button class="primary" id="createBtn">建立遊戲房間</button></div>
+ <!-- 1. 主分頁 -->
+ <section class="card" id="home">
+  <div class="grid">
+   <div>
+    <h2>🎤 建立遊戲（主持人）</h2>
+    <label>主持人名稱</label>
+    <input id="hostName" maxlength="16" value="主持人">
+    <label>每題作答秒數</label>
+    <select id="seconds">
+     <option>10</option>
+     <option selected>15</option>
+     <option>20</option>
+     <option>30</option>
+     <option>45</option>
+     <option>60</option>
+    </select>
+    <div class="buttons"><button class="primary" id="createBtn">建立遊戲房間</button></div>
+   </div>
+   <div>
+    <h2>🙋 加入遊戲（玩家）</h2>
+    <label>房間代碼</label>
+    <input id="roomCodeInput" maxlength="5" placeholder="輸入 5 位代碼">
+    <label>玩家名稱</label>
+    <input id="playerName" maxlength="16" placeholder="輸入你的名稱">
+    <div class="buttons"><button class="primary" id="joinBtn">加入房間</button></div>
+   </div>
   </div>
-  <div><h2>🙋 加入遊戲（玩家）</h2>
-   <label>房間代碼</label><input id="roomCodeInput" maxlength="5" placeholder="輸入 5 位代碼">
-   <label>玩家名稱</label><input id="playerName" maxlength="16" placeholder="輸入你的名稱">
-   <div class="buttons"><button class="primary" id="joinBtn">加入房間</button></div>
+ </section>
+
+ <!-- 2. 主持人等待大廳 -->
+ <section class="card hidden" id="hostLobby">
+  <h2>🎤 遊戲大廳（主持人控制面板）</h2>
+  <div class="code" id="lobbyCode">-----</div>
+  <div class="sharebox">
+   <div class="qrbox" id="qrcode"></div>
+   <div>
+    <p>分享此畫面讓玩家掃描 QR Code，或者分享加入連結：</p>
+    <button class="secondary" id="copyLinkBtn">複製遊戲連結</button>
+   </div>
   </div>
- </div>
-</section>
+  <div class="topline"><span id="playerCount">等待玩家加入... (0 人)</span></div>
+  <div class="players" id="hostPlayerList"></div>
+  <div class="buttons"><button class="primary" id="startBtn">開始遊戲</button></div>
+ </section>
 
-<!-- 主持人等待大廳 -->
-<section class="card hidden" id="hostLobby">
- <h2>🎤 遊戲大廳（主持人控制面板）</h2>
- <div class="code" id="lobbyCode">-----</div>
- <div class="sharebox">
-  <div class="qrbox" id="qrcode"></div>
-  <div><p>分享此畫面讓玩家掃描 QR Code，或者分享加入連結：</p><button class="secondary" id="copyLinkBtn">複製遊戲連結</button></div>
- </div>
- <div class="topline"><span id="playerCount">等待玩家加入... (0 人)</span></div>
- <div class="players" id="hostPlayerList"></div>
- <div class="buttons"><button class="primary" id="startBtn">開始遊戲</button></div>
-</section>
+ <!-- 3. 玩家等待大廳 -->
+ <section class="card hidden" id="playerLobby">
+  <div class="center">
+   <h2>🙋 已成功加入房間！</h2>
+   <p class="muted">房間代碼：<strong id="playerLobbyCode" style="color:var(--blue)">-----</strong></p>
+   <p>請稍候，等待主持人開始遊戲...</p>
+  </div>
+ </section>
 
-<!-- 玩家等待大廳 -->
-<section class="card hidden" id="playerLobby">
- <div class="center">
-  <h2>🙋 已成功加入房間！</h2>
-  <p class="muted">房間代碼：<strong id="playerLobbyCode" style="color:var(--blue)">-----</strong></p>
-  <p>請稍候，等待主持人開始遊戲...</p>
- </div>
-</section>
-
-<!-- 遊戲對戰進行畫面 (通用) -->
-<section class="card hidden" id="gameArea">
- <div class="topline"><span id="qNumber">第 - / - 題</span><span id="timerText">剩餘時間：-- 秒</span></div>
- <div class="progress"><div class="bar" id="progressBar"></div></div>
- <div class="question" id="qText">讀取題目中...</div>
- <div class="answers" id="answerButtons"></div>
- <div class="status center" id="gameStatus"></div>
- <div class="buttons" id="hostNextArea" style="justify-content:center;margin-top:25px">
-  <button class="primary hidden" id="nextBtn">下一題 / 公布結果</button>
- </div>
-</section>
-
+ <!-- 4. 遊戲對戰進行畫面 -->
+ <section class="card hidden" id="gameArea">
+  <div class="topline"><span id="qNumber">第 - / - 題</span><span id="timerText">剩餘時間：-- 秒</span></div>
+  <div class="progress"><div class="bar" id="progressBar"></div></div>
+  <div class="question" id="qText">讀取題目中...</div>
+  <div class="answers" id="answerButtons"></div>
+  <div class="status center" id="gameStatus"></div>
+  <div class="buttons" id="hostNextArea" style="justify-content:center;margin-top:25px">
+   <button class="primary hidden" id="nextBtn">下一題 / 公布結果</button>
+  </div>
+ </section>
 </div>
 
 <script>
+// 初始化 Socket.IO
 const socket = io();
 let currentRole = "";
 let isAnswered = false;
 let countdownTimer = null;
 
-// 預設的基礎題庫資料（與後端一致）
+// 預設題庫
 const defaultQuestions = [
   { q: "台灣最高的山是哪一座？", options: ["玉山", "雪山", "阿里山", "合歡山"], answer: 0 },
   { q: "一年有幾個月？", options: ["10 個月", "11 個月", "12 個月", "13 個月"], answer: 2 },
   { q: "下列哪一個是哺乳類動物？", options: ["企鵝", "海豚", "鱷魚", "青蛙"], answer: 1 }
 ];
 
-// 頁面切換輔助函式
+// 切換視圖控制
 function showView(viewId) {
   ["home", "hostLobby", "playerLobby", "gameArea"].forEach(id => {
     document.getElementById(id).classList.add("hidden");
@@ -96,111 +117,113 @@ function showView(viewId) {
   document.getElementById(viewId).classList.remove("hidden");
 }
 
-// 網址參數帶入房間代碼自動填寫
+// 自動解析 URL 帶入的房間代碼
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has("room")) {
   document.getElementById("roomCodeInput").value = urlParams.get("room").toUpperCase();
 }
 
-// ---- 事件綁定 ----
-
-// 主持人：建立遊戲房間
-document.getElementById("createBtn").onclick = () => {
+// 主持人建立房間
+document.getElementById("createBtn").onclick = function() {
   const hostName = document.getElementById("hostName").value.trim();
   const seconds = document.getElementById("seconds").value;
   
-  socket.emit("createRoom", { hostName, questions: defaultQuestions, seconds }, (res) => {
-    if (res.error) return alert(res.error);
+  socket.emit("createRoom", { hostName, questions: defaultQuestions, seconds }, function(res) {
+    if (res.error) {
+      alert(res.error);
+      return;
+    }
     
     currentRole = "host";
     document.getElementById("lobbyCode").innerText = res.roomCode;
     
-    // 生成 QR Code 與加入連結
+    // 清空並重新渲染 QR 碼（使用全域 QRCode 物件）
     document.getElementById("qrcode").innerHTML = "";
-    const joinUrl = `${window.location.origin}${window.location.pathname}?room=${res.roomCode}`;
-    new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 140, height: 140 });
+    const joinUrl = window.location.origin + window.location.pathname + "?room=" + res.roomCode;
     
-    document.getElementById("copyLinkBtn").onclick = () => {
-      navigator.clipboard.writeText(joinUrl).then(() => alert("連結已複製到剪貼簿！"));
+    if (typeof QRCode !== "undefined") {
+      new QRCode(document.getElementById("qrcode"), { text: joinUrl, width: 140, height: 140 });
+    }
+    
+    document.getElementById("copyLinkBtn").onclick = function() {
+      navigator.clipboard.writeText(joinUrl).then(function() {
+        alert("連結已複製到剪貼簿！");
+      });
     };
     
     showView("hostLobby");
   });
 };
 
-// 玩家：加入遊戲房間
-document.getElementById("joinBtn").onclick = () => {
+// 玩家加入房間
+document.getElementById("joinBtn").onclick = function() {
   const roomCode = document.getElementById("roomCodeInput").value.trim();
   const name = document.getElementById("playerName").value.trim();
   
-  socket.emit("joinRoom", { roomCode, name }, (res) => {
-    if (res.error) return alert(res.error);
-    
+  socket.emit("joinRoom", { roomCode, name }, function(res) {
+    if (res.error) {
+      alert(res.error);
+      return;
+    }
     currentRole = "player";
     document.getElementById("playerLobbyCode").innerText = res.roomCode;
     showView("playerLobby");
   });
 };
 
-// 主持人：點擊開始遊戲
-document.getElementById("startBtn").onclick = () => {
-  socket.emit("startGame", (res) => {
+// 主持人開始遊戲
+document.getElementById("startBtn").onclick = function() {
+  socket.emit("startGame", function(res) {
     if (res.error) alert(res.error);
   });
 };
 
-// 主持人：點擊下一題
-document.getElementById("nextBtn").onclick = () => {
-  socket.emit("nextQuestion", (res) => {
+// 主持人下一題
+document.getElementById("nextBtn").onclick = function() {
+  socket.emit("nextQuestion", function(res) {
     if (res.error) alert(res.error);
   });
 };
 
-// ---- Socket.IO 事件監聽 ----
-
-// 接收大廳玩家清單更新
-socket.on("players", (players) => {
+// 接收更新名單
+socket.on("players", function(players) {
   if (currentRole === "host") {
-    document.getElementById("playerCount").innerText = `已加入的玩家 (${players.length} 人)`;
+    document.getElementById("playerCount").innerText = "已加入的玩家 (" + players.length + " 人)";
     const container = document.getElementById("hostPlayerList");
-    container.innerHTML = players.map(p => `<div class="player"><span>👤 ${p.name}</span><strong>${p.score} 分</strong></div>`).join("");
+    container.innerHTML = players.map(function(p) {
+      return '<div class="player"><span>👤 ' + p.name + '</span><strong>' + p.score + ' 分</strong></div>';
+    }).join("");
   }
 });
 
-// 開始新的一題
-socket.on("question", (data) => {
+// 接收新題目
+socket.on("question", function(data) {
   isAnswered = false;
   showView("gameArea");
   document.getElementById("nextBtn").classList.add("hidden");
   document.getElementById("gameStatus").innerText = "";
-  
-  document.getElementById("qNumber").innerText = `第 ${data.number} / ${data.total} 題`;
+  document.getElementById("qNumber").innerText = "第 " + data.number + " / " + data.total + " 題";
   document.getElementById("qText").innerText = data.q;
   
   const btnContainer = document.getElementById("answerButtons");
-  btnContainer.innerHTML = data.options.map((opt, idx) => {
-    return `<button class="answer" onclick="submitAnswer(${idx})">${opt}</button>`;
+  btnContainer.className = "answers";
+  btnContainer.innerHTML = data.options.map(function(opt, idx) {
+    return '<button class="answer" onclick="sendAnswer(' + idx + ')">' + opt + '</button>';
   }).join("");
   
-  // 啟動倒數計時條
   clearInterval(countdownTimer);
   const totalMs = data.seconds * 1000;
-  countdownTimer = setInterval(() => {
+  countdownTimer = setInterval(function() {
     const remain = data.endsAt - Date.now();
     if (remain <= 0) {
       clearInterval(countdownTimer);
       document.getElementById("timerText").innerText = "時間到！";
       document.getElementById("progressBar").style.width = "0%";
     } else {
-      document.getElementById("timerText").innerText = `剩餘時間：${Math.ceil(remain / 1000)} 秒`;
-      document.getElementById("progressBar").style.width = `${(remain / totalMs) * 1000 / 10}%`;
+      document.getElementById("timerText").innerText = "剩餘時間：" + Math.ceil(remain / 1000) + " 秒";
+      document.getElementById("progressBar").style.width = (remain / totalMs * 100) + "%";
     }
   }, 100);
 });
 
-// 玩家作答函式
-window.submitAnswer = function(choice) {
-  if (isAnswered || currentRole === "host") return;
-  isAnswered = true;
-  
-  // 禁用所有按鈕
+// 玩家送出答案（重新命名避免與原生關鍵字衝突）
