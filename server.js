@@ -147,7 +147,12 @@ io.on("connection", socket => {
       const remaining = Math.max(0, room.endsAt - Date.now());
       player.score += 100 + Math.round(remaining / room.seconds / 10);
     }
-    cb?.({ok:true, correct});
+    cb?.({
+  ok: true,
+  correct,
+  correctChoice: q.answer,
+  correctText: q.options[q.answer]
+});
     io.to(roomCode).emit("answerCount", {
       answered: [...room.players.values()].filter(p => p.answered).length,
       total: room.players.size
