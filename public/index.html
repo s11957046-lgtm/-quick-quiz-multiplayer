@@ -97,7 +97,9 @@ button{border:0;border-radius:12px;padding:12px 17px;font:inherit;font-weight:75
 
 <script>
 // 初始化 Socket.IO
-const socket = io();
+const socket = io({
+  transports: ['websocket', 'polling']
+});
 let currentRole = "";
 let isAnswered = false;
 let countdownTimer = null;
