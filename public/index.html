@@ -2,58 +2,141 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>快問快答｜多人連線競賽</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>快問快答｜多人競賽</title>
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
-:root{--blue:#4263eb;--ink:#202640;--muted:#68738b;--line:#e3e8f4}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(145deg,#edf2ff,#f8faff 55%,#eefaf7);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color:var(--ink);min-height:100vh}
-.wrap{width:min(900px,93%);margin:auto;padding:28px 0 55px}
-header{text-align:center;margin-bottom:22px}
-h1{font-size:clamp(28px,5vw,40px);margin:0 0 7px}
-header p,.muted{color:var(--muted)}
-.card{background:white;border:1px solid var(--line);border-radius:21px;padding:clamp(18px,4vw,30px);box-shadow:0 12px 35px #3449a80d;margin-bottom:16px}
-h2{margin:0 0 16px}
-label{display:block;font-weight:700;margin:13px 0 6px}
-input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font:inherit;background:#fbfcff;color:var(--ink)}
-textarea{min-height:70px;resize:vertical}
-button{border:0;border-radius:12px;padding:12px 17px;font:inherit;font-weight:750;cursor:pointer}
-.primary{background:var(--blue);color:#fff}
-.secondary{background:#edf0f8;color:#39435d}
-.danger{background:#fff0f0;color:#b42318;padding:8px 11px}
-.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+body{
+  margin:0;
+  font-family:Arial,"Noto Sans TC",sans-serif;
+  background:linear-gradient(135deg,#eaf0ff,#f7fbff);
+  color:#202640;
+}
+.wrap{max-width:850px;width:93%;margin:auto;padding:25px 0 50px}
+header{text-align:center;margin-bottom:20px}
+h1{font-size:32px}
+.card{
+  background:white;
+  padding:24px;
+  border-radius:18px;
+  margin-bottom:16px;
+  box-shadow:0 5px 25px #0000000d;
+}
+h2{margin-top:0}
+input,textarea,select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin:6px 0 12px;
+  font-size:16px;
+}
+textarea{min-height:70px}
+button{
+  border:0;
+  padding:12px 18px;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.primary{background:#4263eb;color:white}
+.secondary{background:#edf0f8;color:#333}
+.danger{background:#ffecec;color:#c00;padding:7px 12px}
 .hidden{display:none!important}
-.option-edit{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0}
-.radio{display:flex;gap:5px;align-items:center;font-size:13px;color:var(--muted);white-space:nowrap}
-.radio input{width:auto}
-.qrow{border-top:1px solid var(--line);padding:12px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}
-.code{font-size:clamp(32px,8vw,54px);font-weight:900;letter-spacing:8px;color:var(--blue);text-align:center;background:#f1f4ff;border-radius:15px;padding:12px}
-.sharebox{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;margin:16px auto}
-.qrbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;min-width:150px;min-height:150px;display:grid;place-items:center}
-.qrbox img{display:block}
+label{font-weight:bold}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .center{text-align:center}
-.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin-top:12px}
-.player{background:#f5f7fc;padding:10px 12px;border-radius:10px;display:flex;justify-content:space-between;gap:8px}
-.topline{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-weight:700}
-.progress{height:9px;background:#edf0f8;border-radius:20px;overflow:hidden;margin:12px 0 24px}
-.bar{height:100%;background:#20a77b;width:0}
-.question{font-size:clamp(22px,4vw,30px);line-height:1.4;margin:0 0 20px}
-.answers{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.answer{background:white;border:2px solid var(--line);color:var(--ink);text-align:left;padding:15px}
-.answer:disabled{cursor:default;opacity:.8}
-.answer.correct{border-color:#21a179;background:#edfbf5}
-.answer.wrong{border-color:#e46a6a;background:#fff2f2}
-.status{font-weight:750;min-height:26px;margin-top:15px}
-.rank{font-size:20px;font-weight:800;color:var(--blue);margin-right:8px}
-.small{font-size:13px;color:var(--muted)}
+.muted{color:#777}
+.code{
+  font-size:48px;
+  font-weight:bold;
+  letter-spacing:8px;
+  color:#4263eb;
+  text-align:center;
+  padding:15px;
+  background:#f0f3ff;
+  border-radius:12px;
+}
+.sharebox{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap;
+  margin:20px 0;
+}
+.qrbox{
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  min-width:170px;
+  min-height:170px;
+  display:grid;
+  place-items:center;
+}
+.players{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:8px;
+}
+.player{
+  padding:10px;
+  background:#f3f5fa;
+  border-radius:9px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.option-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+}
+.option-row input[type=radio]{width:auto}
+.question{
+  font-size:26px;
+  line-height:1.5;
+}
+.answers{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.answer{
+  background:#f1f4ff;
+  color:#222;
+  border:2px solid #dce3ff;
+  text-align:left;
+  min-height:60px;
+}
+.answer:disabled{opacity:.8}
+.answer.correct{background:#d9f8e9;border-color:#22a06b}
+.progress{
+  height:10px;
+  background:#eee;
+  border-radius:10px;
+  overflow:hidden;
+  margin:15px 0;
+}
+.bar{height:100%;background:#20a77b;width:100%}
+.qrow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  border-top:1px solid #eee;
+  padding:12px 0;
+}
+.rank{font-size:22px;color:#4263eb;margin-right:10px}
+.status{font-weight:bold;margin-top:15px;min-height:25px}
 @media(max-width:600px){
-.grid,.answers{grid-template-columns:1fr}
-.option-edit{grid-template-columns:1fr}
-.radio{padding-left:4px}
-.code{letter-spacing:5px}
+  .answers{grid-template-columns:1fr}
+  .code{font-size:38px}
 }
 </style>
 </head>
@@ -63,113 +146,148 @@ button{border:0;border-radius:12px;padding:12px 17px;font:inherit;font-weight:75
 
 <header>
 <h1>🏆 快問快答・多人競賽</h1>
-<p>主持人建立房間，玩家用手機輸入代碼一起答題！</p>
+<p class="muted">掃描 QR Code，加入即時問答遊戲！</p>
 </header>
 
-<section class="card" id="home">
-<div class="grid">
-<div>
-<h2>🎤 建立遊戲（主持人）</h2>
+<!-- 主持人建立遊戲 -->
+<section class="card hidden" id="hostSetup">
+
+<h2>🎤 主持人專區</h2>
+
 <label>主持人名稱</label>
-<input id="hostName" maxlength="16" value="主持人">
-<label>每題作答秒數</label>
+<input id="hostName" value="主持人" maxlength="16">
+
+<label>每題作答時間</label>
 <select id="seconds">
-<option>10</option>
-<option selected>15</option>
-<option>20</option>
-<option>30</option>
-<option>45</option>
-<option>60</option>
+<option value="10">10 秒</option>
+<option value="15" selected>15 秒</option>
+<option value="20">20 秒</option>
+<option value="30">30 秒</option>
+<option value="45">45 秒</option>
+<option value="60">60 秒</option>
 </select>
+
+<hr>
+
+<h2>📝 題庫編輯</h2>
+
+<label>題目內容</label>
+<textarea id="qInput" placeholder="請輸入題目"></textarea>
+
+<div id="optionFields"></div>
+
 <div class="buttons">
-<button class="primary" id="createBtn">建立遊戲房間</button>
-</div>
+<button class="primary" id="addQuestionBtn">＋ 新增題目</button>
+<button class="secondary" id="resetFormBtn">清空欄位</button>
 </div>
 
-<div>
-<h2>🙋 加入遊戲（玩家）</h2>
-<label>房間代碼</label>
-<input id="roomCode" maxlength="5" placeholder="輸入 5 位代碼">
-<label>玩家名稱</label>
-<input id="playerName" maxlength="16" placeholder="輸入你的名稱">
-<div class="buttons">
-<button class="primary" id="joinBtn">加入房間</button>
-</div>
-</div>
-</div>
-<p class="small">玩家無須註冊帳號，使用手機或電腦瀏覽器即可加入。</p>
+<h3>目前題庫：<span id="qCount">0</span> 題</h3>
+<div id="questionList"></div>
+
+<hr>
+
+<button class="primary" id="createBtn" style="width:100%">
+建立遊戲房間
+</button>
+
 </section>
 
+<!-- 玩家加入：QR Code 會直接進入這個畫面 -->
+<section class="card hidden" id="playerJoin">
+
+<h2 class="center">🙋 加入遊戲</h2>
+
+<p class="center muted">請輸入你的玩家姓名</p>
+
+<label>玩家姓名</label>
+<input id="playerName" maxlength="16" placeholder="輸入姓名">
+
+<button class="primary" id="joinBtn" style="width:100%">
+加入遊戲
+</button>
+
+<p class="center muted" id="joinMessage"></p>
+
+</section>
+
+<!-- 主持人等待室 -->
 <section class="card hidden" id="hostLobby">
-<h2>🎉 房間已建立！</h2>
-<p class="center muted">請讓玩家掃描 QR Code，或輸入下方房間代碼加入</p>
+
+<h2 class="center">🎉 房間建立成功！</h2>
+
+<p class="center muted">請玩家掃描 QR Code 加入</p>
+
 <div class="code" id="hostCode"></div>
+
 <div class="sharebox">
-<div class="qrbox" id="roomQr">
-<span class="small">產生 QR Code 中…</span>
+<div class="qrbox" id="roomQr"></div>
 </div>
-<div>
-<p class="muted" id="shareUrlText">遊戲連結將顯示於此</p>
-<button class="secondary" id="copyLinkBtn">複製加入連結</button>
-</div>
-</div>
-<p class="center muted" id="hostPlayerCount">目前 0 位玩家</p>
+
+<p class="center muted">目前玩家人數</p>
+<h2 class="center" id="hostPlayerCount">0 人</h2>
+
 <div class="players" id="hostPlayers"></div>
+
 <div class="buttons">
-<button class="primary" id="startBtn">開始遊戲</button>
+<button class="primary" id="startBtn" style="width:100%">
+開始遊戲
+</button>
 </div>
-<p class="small">開始後將無法再加入新玩家。建議先確認所有人都已進房。</p>
+
 </section>
 
+<!-- 玩家等待室 -->
 <section class="card hidden" id="playerLobby">
-<h2>✅ 已成功加入</h2>
+
+<h2 class="center">✅ 加入成功！</h2>
+
 <p class="center" id="joinedMessage"></p>
+
 <p class="center muted">等待主持人開始遊戲……</p>
-<div class="players" id="playerLobbyPlayers"></div>
+
 </section>
 
+<!-- 遊戲畫面 -->
 <section class="card hidden" id="game">
-<div class="topline">
-<span id="questionNo">第 1 題</span>
-<span id="timer">⏱ 15 秒</span>
+
+<div style="display:flex;justify-content:space-between">
+<strong id="questionNo"></strong>
+<strong id="timer">15 秒</strong>
 </div>
+
 <div class="progress">
 <div class="bar" id="timeBar"></div>
 </div>
+
 <h2 class="question" id="questionText"></h2>
+
 <div class="answers" id="answerList"></div>
-<div class="status" id="gameStatus" aria-live="polite"></div>
-<p class="small" id="answerCount"></p>
+
+<div class="status" id="gameStatus"></div>
+
+<p class="muted" id="answerCount"></p>
+
 <div class="buttons hidden" id="hostNextWrap">
-<button class="primary" id="nextBtn">下一題</button>
+<button class="primary" id="nextBtn" style="width:100%">
+下一題
+</button>
 </div>
+
 </section>
 
+<!-- 最終排行榜 -->
 <section class="card hidden" id="finished">
-<div class="center">
-<div style="font-size:48px">🏆</div>
-<h2>遊戲結束！最終排行榜</h2>
-</div>
-<div id="finalRanking"></div>
-<div class="buttons">
-<button class="secondary" onclick="location.reload()">回到首頁</button>
-</div>
-</section>
 
-<section class="card" id="editor">
-<h2>📝 題庫設定</h2>
-<p class="muted">建立遊戲前編輯題目。每題可設定 2～4 個選項，最多 50 題。</p>
-<label>題目</label>
-<textarea id="qInput" placeholder="輸入題目內容"></textarea>
-<div id="optionFields"></div>
-<div class="buttons">
-<button class="primary" id="addQuestionBtn">加入題庫</button>
-<button class="secondary" id="resetFormBtn">清空欄位</button>
-</div>
-<div style="margin-top:20px">
-<strong>目前題庫：<span id="qCount">3</span> 題</strong>
-<div id="questionList"></div>
-</div>
+<h1 class="center">🏆 遊戲結束！</h1>
+
+<h2 class="center">最終排行榜</h2>
+
+<div id="finalRanking"></div>
+
+<button class="secondary" onclick="location.href=location.pathname">
+返回首頁
+</button>
+
 </section>
 
 </div>
@@ -177,13 +295,15 @@ button{border:0;border-radius:12px;padding:12px 17px;font:inherit;font-weight:75
 <script>
 const socket=io();
 
+let role=null;
 let questions=[
 {q:"台灣最高的山是哪一座？",options:["玉山","雪山","阿里山","合歡山"],answer:0},
 {q:"一年有幾個月？",options:["10 個月","11 個月","12 個月","13 個月"],answer:2},
 {q:"下列哪一個是哺乳類動物？",options:["企鵝","海豚","鱷魚","青蛙"],answer:1}
 ];
 
-let role=null,seconds=15,timerInterval=null;
+let timerInterval=null;
+let currentRoomCode=null;
 
 const $=id=>document.getElementById(id);
 
@@ -196,183 +316,176 @@ return String(s).replace(/[&<>"']/g,c=>({
 }[c]));
 }
 
+// 初始化題目選項
 function buildOptionFields(){
 $("optionFields").innerHTML="";
+
 for(let i=0;i<4;i++){
 const row=document.createElement("div");
-row.className="option-edit";
-row.innerHTML=`<input id="opt${i}" placeholder="選項 ${"ABCD"[i]}"><label class="radio"><input type="radio" name="correct" value="${i}" ${i===0?"checked":""}> 正確答案</label>`;
+row.className="option-row";
+
+row.innerHTML=`
+<input id="opt${i}" placeholder="選項 ${"ABCD"[i]}">
+<label>
+<input type="radio" name="correct" value="${i}" ${i===0?"checked":""}>
+ 正確答案
+</label>`;
+
 $("optionFields").appendChild(row);
 }
 }
 
+// 題庫列表
 function renderQuestions(){
 $("qCount").textContent=questions.length;
 $("questionList").innerHTML="";
+
 questions.forEach((q,i)=>{
 const row=document.createElement("div");
 row.className="qrow";
-const label=document.createElement("span");
-label.textContent=`${i+1}. ${q.q}`;
+
+const title=document.createElement("span");
+title.textContent=`${i+1}. ${q.q}`;
+
 const del=document.createElement("button");
 del.className="danger";
 del.textContent="刪除";
+
 del.onclick=()=>{
 questions.splice(i,1);
 renderQuestions();
 };
-row.append(label,del);
+
+row.append(title,del);
 $("questionList").append(row);
 });
 }
 
+// 清空題目表單
 function resetForm(){
 $("qInput").value="";
 for(let i=0;i<4;i++)$("opt"+i).value="";
 document.querySelector('input[name="correct"][value="0"]').checked=true;
 }
 
+// 新增題目
 $("addQuestionBtn").onclick=()=>{
 const q=$("qInput").value.trim();
+
 const raw=[0,1,2,3].map(i=>$("opt"+i).value.trim());
-const selected=Number(document.querySelector('input[name="correct"]:checked').value);
+
+const selected=Number(
+document.querySelector('input[name="correct"]:checked').value
+);
+
 const options=raw.filter(Boolean);
 const answer=raw.slice(0,selected).filter(Boolean).length;
 
 if(!q)return alert("請輸入題目！");
-if(options.length<2)return alert("至少需要 2 個選項！");
-if(!raw[selected])return alert("請勾選一個有填寫內容的正確答案！");
-if(questions.length>=50)return alert("最多只能設定 50 題！");
+if(options.length<2)return alert("至少需要兩個選項！");
+if(!raw[selected])return alert("正確答案必須填寫！");
+if(questions.length>=50)return alert("最多 50 題！");
 
 questions.push({q,options,answer});
+
 resetForm();
 renderQuestions();
 };
 
 $("resetFormBtn").onclick=resetForm;
 
+// 建立房間
 $("createBtn").onclick=()=>{
-if(!questions.length)return alert("請先新增至少一題！");
-
-seconds=Number($("seconds").value);
+if(!questions.length)return alert("請至少保留一題！");
 
 socket.emit("createRoom",{
 hostName:$("hostName").value,
 questions,
-seconds
+seconds:Number($("seconds").value)
 },res=>{
+
 if(res.error)return alert(res.error);
 
 role="host";
-hide("home");
-hide("editor");
+currentRoomCode=res.roomCode;
+
+hide("hostSetup");
 show("hostLobby");
 
 $("hostCode").textContent=res.roomCode;
 
+// QR Code 自動帶入房間代碼
 const joinUrl=new URL(location.href);
+joinUrl.search="";
 joinUrl.searchParams.set("room",res.roomCode);
 
-$("shareUrlText").textContent=joinUrl.toString();
 $("roomQr").innerHTML="";
 
-if(window.QRCode){
 new QRCode($("roomQr"),{
 text:joinUrl.toString(),
-width:150,
-height:150
+width:160,
+height:160
 });
-}else{
-$("roomQr").textContent="QR Code 載入失敗，請分享房間代碼";
-}
 
-$("copyLinkBtn").onclick=async()=>{
-try{
-await navigator.clipboard.writeText(joinUrl.toString());
-alert("加入網址已複製！");
-}catch(e){
-prompt("請複製以下網址",joinUrl.toString());
-}
-};
 });
 };
 
+// 玩家加入
 $("joinBtn").onclick=()=>{
+const name=$("playerName").value.trim();
+
+if(!name)return alert("請輸入玩家姓名！");
+
+$("joinBtn").disabled=true;
+$("joinMessage").textContent="正在加入房間……";
+
 socket.emit("joinRoom",{
-roomCode:$("roomCode").value,
-name:$("playerName").value
+roomCode:currentRoomCode,
+name
 },res=>{
-if(res.error)return alert(res.error);
+
+$("joinBtn").disabled=false;
+
+if(res.error){
+$("joinMessage").textContent=res.error;
+return;
+}
 
 role="player";
-hide("home");
-hide("editor");
+
+hide("playerJoin");
 show("playerLobby");
 
-$("joinedMessage").textContent=`你好，${res.name}！房間代碼：${res.roomCode}`;
+$("joinedMessage").textContent=`歡迎 ${res.name}！`;
 });
 };
 
+// 開始遊戲
 $("startBtn").onclick=()=>{
 socket.emit("startGame",res=>{
 if(res?.error)alert(res.error);
 });
 };
 
-$("copyLinkBtn").onclick=async()=>{
-const text=$("shareUrlText").textContent;
-try{
-await navigator.clipboard.writeText(text);
-$("copyLinkBtn").textContent="已複製！";
-setTimeout(()=>$("copyLinkBtn").textContent="複製加入連結",1800);
-}catch(e){
-prompt("請複製以下加入連結：",text);
-}
-};
+// 更新玩家列表
+socket.on("players",players=>{
 
-function renderPlayers(players,target){
-const el=$(target);
-el.innerHTML="";
+$("hostPlayerCount").textContent=`${players.length} 人`;
+
+$("hostPlayers").innerHTML="";
 
 players.forEach((p,i)=>{
 const div=document.createElement("div");
 div.className="player";
 div.innerHTML=`<span>${i+1}. ${esc(p.name)}</span><strong>${p.score} 分</strong>`;
-el.append(div);
+$("hostPlayers").append(div);
 });
 
-if(!players.length)el.innerHTML='<span class="muted">尚無玩家加入</span>';
-
-if(target==="hostPlayers"){
-$("hostPlayerCount").textContent=`目前 ${players.length} / 100 位玩家`;
-}
-}
-
-socket.on("players",players=>{
-renderPlayers(players,"hostPlayers");
-renderPlayers(players,"playerLobbyPlayers");
 });
 
-function beginTimer(endsAt){
-clearInterval(timerInterval);
-
-const tick=()=>{
-const left=Math.max(0,endsAt-Date.now());
-const secs=Math.ceil(left/1000);
-
-$("timer").textContent=`⏱ ${secs} 秒`;
-
-$("timeBar").style.width=
-`${Math.max(0,Math.min(100,left/(Number($("timer").dataset.total||15)*1000)*100))}%`;
-
-if(left<=0)clearInterval(timerInterval);
-};
-
-tick();
-timerInterval=setInterval(tick,150);
-}
-
+// 開始新題目
 socket.on("question",data=>{
+
 hide("hostLobby");
 hide("playerLobby");
 hide("finished");
@@ -380,97 +493,159 @@ show("game");
 
 $("questionNo").textContent=`第 ${data.number} / ${data.total} 題`;
 $("questionText").textContent=data.q;
-$("answerList").innerHTML="";
+
 $("gameStatus").textContent="";
 $("answerCount").textContent="等待玩家作答……";
 $("hostNextWrap").classList.add("hidden");
 
-$("timer").dataset.total=data.seconds;
-$("timeBar").style.width="100%";
+$("answerList").innerHTML="";
 
 data.options.forEach((opt,i)=>{
-const b=document.createElement("button");
-b.className="answer";
-b.textContent=`${"ABCD"[i]}. ${opt}`;
 
-b.onclick=()=>{
+const btn=document.createElement("button");
+btn.className="answer";
+btn.textContent=`${"ABCD"[i]}. ${opt}`;
+
+btn.onclick=()=>{
 if(role!=="player")return;
 
-[...$("answerList").children].forEach(x=>x.disabled=true);
+[...$("answerList").children].forEach(b=>b.disabled=true);
 
 socket.emit("submitAnswer",{choice:i},res=>{
-$("gameStatus").textContent=
-res?.error||(res.correct?"✅ 回答正確！":"已送出答案，等待公布結果。");
+if(res?.error){
+$("gameStatus").textContent=res.error;
+}else{
+$("gameStatus").textContent=res.correct?"✅ 回答正確！":"已送出答案，等待公布結果。";
+}
 });
+
 };
 
-$("answerList").append(b);
+$("answerList").append(btn);
+
 });
 
-beginTimer(data.endsAt);
+startTimer(data.endsAt,data.seconds);
+
 });
 
+// 倒數計時
+function startTimer(endsAt,total){
+
+clearInterval(timerInterval);
+
+function tick(){
+
+const left=Math.max(0,endsAt-Date.now());
+const secs=Math.ceil(left/1000);
+
+$("timer").textContent=`⏱ ${secs} 秒`;
+
+$("timeBar").style.width=`${left/(total*1000)*100}%`;
+
+if(left<=0){
+clearInterval(timerInterval);
+}
+}
+
+tick();
+timerInterval=setInterval(tick,150);
+}
+
+// 更新答題人數
 socket.on("answerCount",data=>{
-$("answerCount").textContent=`已作答：${data.answered} / ${data.total} 人`;
+$("answerCount").textContent=
+`已作答：${data.answered} / ${data.total} 人`;
 });
 
+// 公布答案
 socket.on("reveal",data=>{
+
 clearInterval(timerInterval);
 
 $("gameStatus").textContent=
 `正確答案：${"ABCD"[data.correct]}. ${data.correctText}`;
 
-[...$("answerList").children].forEach((b,i)=>{
-b.disabled=true;
-if(i===data.correct)b.classList.add("correct");
+[...$("answerList").children].forEach((btn,i)=>{
+btn.disabled=true;
+if(i===data.correct)btn.classList.add("correct");
 });
 
-if(role==="host")show("hostNextWrap");
+if(role==="host"){
+show("hostNextWrap");
+}
+
 });
 
+// 下一題
 $("nextBtn").onclick=()=>{
 socket.emit("nextQuestion",res=>{
 if(res?.error)alert(res.error);
 });
 };
 
+// 遊戲結束
 socket.on("gameOver",data=>{
+
 clearInterval(timerInterval);
+
 hide("game");
 show("finished");
 
-const list=$("finalRanking");
-list.innerHTML="";
+$("finalRanking").innerHTML="";
 
 data.players.forEach((p,i)=>{
+
 const row=document.createElement("div");
 row.className="qrow";
-row.innerHTML=`<span><b class="rank">${i+1}.</b>${esc(p.name)}</span><strong>${p.score} 分</strong>`;
-list.append(row);
+
+row.innerHTML=`
+<span><b class="rank">${i+1}.</b>${esc(p.name)}</span>
+<strong>${p.score} 分</strong>`;
+
+$("finalRanking").append(row);
+
 });
 
-if(!data.players.length)list.textContent="沒有玩家資料。";
 });
 
+// 房間關閉
 socket.on("roomClosed",()=>{
 alert("主持人已離開，遊戲房間已關閉。");
-location.reload();
+location.href=location.pathname;
 });
 
+// 連線錯誤
 socket.on("connect_error",()=>{
-alert("連線失敗，請重新整理頁面再試一次。");
+alert("連線失敗，請重新整理頁面。");
 });
 
-const roomFromUrl=new URLSearchParams(location.search).get("room");
+// 網址判斷：有 room 參數就是玩家模式
+function init(){
 
-if(roomFromUrl){
-$("roomCode").value=roomFromUrl.toUpperCase();
-$("playerName").focus();
+const params=new URLSearchParams(location.search);
+const room=params.get("room");
+
+if(room){
+
+currentRoomCode=room.toUpperCase();
+
+hide("hostSetup");
+show("playerJoin");
+
+}else{
+
+hide("playerJoin");
+show("hostSetup");
+
+}
+
 }
 
 buildOptionFields();
 renderQuestions();
-</script>
+init();
 
+</script>
 </body>
 </html>
