@@ -177,8 +177,11 @@ label{font-weight:bold}
 <div id="optionFields"></div>
 
 <div class="buttons">
-<button class="primary" id="addQuestionBtn">＋ 新增題目</button>
-<button class="secondary" id="resetFormBtn">清空欄位</button>
+  <button class="primary" id="addQuestionBtn">新增題目</button>
+  <button class="secondary" id="resetFormBtn">清空欄位</button>
+  <button class="secondary" id="exportQuestionsBtn">匯出題庫</button>
+  <button class="secondary" id="importQuestionsBtn">匯入題庫</button>
+  <input type="file" id="importQuestionsFile" accept=".json" hidden>
 </div>
 
 <h3>目前題庫：<span id="qCount">0</span> 題</h3>
@@ -283,6 +286,14 @@ label{font-weight:bold}
 <h2 class="center">最終排行榜</h2>
 
 <div id="finalRanking"></div>
+
+<div class="buttons">
+  <button class="primary" id="exportScoresBtn">
+    📥 匯出玩家成績 CSV
+  </button>
+</div>
+
+<p class="center muted">遊戲已結束，請主持人匯出成績。</p>
 
 <button class="secondary" onclick="location.href=location.pathname">
 返回首頁
